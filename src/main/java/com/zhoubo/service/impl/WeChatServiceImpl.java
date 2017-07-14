@@ -8,6 +8,7 @@ import com.zhoubo.service.WeChatService;
 import com.zhoubo.util.HttpClientUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.util.Date;
@@ -17,9 +18,20 @@ import java.util.Map;
 /**
  * Created by zhoubo on 2016/12/14.
  */
+@Component("weChatService")
 public class WeChatServiceImpl implements WeChatService{
     public static final String ACCESS_TOKEN_FILE = "accessToken.txt";
 
+    public static void main(String[] args) {
+//       System.out.println(new WeChatServiceImpl().getAccessToken());
+        long sceneId = 123;
+        WeChatService weChatService = new WeChatServiceImpl();
+        String tacket = weChatService.getTacket(sceneId);
+        System.out.println("ticket: " + tacket);
+        String QRUtl = weChatService.getQRbyTicket(tacket);
+        System.out.println("QRUtl: " + QRUtl);
+
+    }
 
     @Override
     public AccessToken getAccessToken() {
@@ -96,8 +108,6 @@ public class WeChatServiceImpl implements WeChatService{
         return String.format(WXUrl.QR_URL, tacket);
     }
 
-
-
     private Object getObjectFromFile(File file) throws IOException, ClassNotFoundException {
         InputStream is = new FileInputStream(file);
         ObjectInputStream ois = new ObjectInputStream(is);
@@ -112,8 +122,9 @@ public class WeChatServiceImpl implements WeChatService{
     }
 
     private AccessToken sendAccessTokenRequest() {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        String accessTokenUrl = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wxd1fb9aca45870db5&secret=7b1d5135b6376a1969c1cc3b9c1fee64";
+        CloseableHttpClient httpClient = HttpClients.createDefault();                                                               //0bf4aa77eb74ae5794cb3c90497a1682
+//        String accessTokenUrl = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx5e1ec633ff1209c1&secret=0bf4aa77eb74ae5794cb3c90497a1682";
+        String accessTokenUrl = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wxd1fb9aca45870db5&secret=7b1d5135b6376a1969c1cc3b9c1fee64"; //测试公众号
         String responeStr = HttpClientUtil.sendGetRequest(accessTokenUrl);
         System.out.println("send access token request!");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -128,16 +139,5 @@ public class WeChatServiceImpl implements WeChatService{
         }
         System.out.println("responeStr = " + responeStr);
         return accessToken;
-    }
-
-    public static void main(String[] args) {
-//       System.out.println(new WeChatServiceImpl().getAccessToken());
-        long sceneId = 123;
-        WeChatService weChatService = new WeChatServiceImpl();
-        String tacket = weChatService.getTacket(sceneId);
-        System.out.println("ticket: " + tacket);
-        String QRUtl = weChatService.getQRbyTicket(tacket);
-        System.out.println("QRUtl: " + QRUtl);
-
     }
 }

@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zhoubo.dao.TestDao">
+    <resultMap id="BaseResultMap"
+               type="com.zhoubo.model.SkinType">
+        <id column="skin_type_id" property="skinTypeId" jdbcType="INTEGER"/>
+        <result column="type_id" property="typeId" jdbcType="INTEGER"/>
+        <result column="type_name" property="typeName" jdbcType="VARCHAR"/>
+        <result column="kind" property="kind" jdbcType="INTEGER"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="desc" property="desc" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap id="SkinTypeColumnWithImgMap"
+               type="com.zhoubo.model.SkinTypeWithPic">
+        <id column="skin_type_id" property="skinTypeId" jdbcType="INTEGER"/>
+        <result column="type_id" property="typeId" jdbcType="INTEGER"/>
+        <result column="type_name" property="typeName" jdbcType="VARCHAR"/>
+        <result column="kind" property="kind" jdbcType="INTEGER"/>
+        <result column="android_pic" property="androidPic" jdbcType="VARCHAR"/>
+        <result column="ios_pic" property="iosPic" jdbcType="VARCHAR"/>
+        <result column="desc" property="desc" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        skin_type_id,
+        type_id,
+        type_name,
+        kind,
+        update_time,
+        `desc`
+    </sql>
+
+    <select id="get" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from tb_skin_type
+        <where>
+            and skin_type_id = #{ skinTypeId,jdbcType=INTEGER }
+        </where>
+    </select>
+
+    <select id="getTotal" resultType="java.lang.Integer"
+            parameterType="com.zhoubo.model.SkinType">
+        select count(1) from tb_skin_type
+        <where>
+            <if test="skinTypeId != null">
+                and skin_type_id = #{ skinTypeId,jdbcType=INTEGER }
+            </if>
+            <if test="typeId != null">
+                and type_id = #{ typeId,jdbcType=INTEGER }
+            </if>
+            <if test="typeName != null">
+                and type_name = #{ typeName,jdbcType=VARCHAR }
+            </if>
+            <if test="kind != null">
+                and kind = #{ kind,jdbcType=INTEGER }
+            </if>
+            <if test="updateTime != null">
+                and update_time = #{ updateTime,jdbcType=TIMESTAMP }
+            </if>
+        </where>
+    </select>
+
+    <select id="getPage" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from tb_skin_type t
+        <where>
+            <if test="queryParam  !=  null">
+                <if test="queryParam.isQueryDimensionType =='true'">
+                    and t.kind in(select t1.tid from td_dimension t1 where t1.type=1)
+                </if>
+                <if test="queryParam.skinTypeId != null">
+                    and t.skin_type_id = #{
+					queryParam.skinTypeId,jdbcType=INTEGER }
+                </if>
+                <if test="queryParam.typeId != null">
+                    and t.type_id = #{ queryParam.typeId,jdbcType=INTEGER }
+                </if>
+                <if test="queryParam.typeName != null">
+                    and t.type_name like concat('%','${queryParam.typeName}','%')
+                </if>
+                <if test="queryParam.kind != null">
+                    and t.kind = #{ queryParam.kind,jdbcType=INTEGER }
+                </if>
+                <if test="queryParam.updateTime != null">
+                    and t.update_time = #{
+					queryParam.updateTime,jdbcType=TIMESTAMP }
+                </if>
+                order by t.kind asc
+            </if>
+        </where>
+
+    </select>
+
+    <select id="getList" resultMap="BaseResultMap"
+            parameterType="com.zhoubo.model.SkinType">
+        select
+        <include refid="Base_Column_List"/>
+        from tb_skin_type
+        <where>
+            <if test="skinTypeId != null">
+                and skin_type_id = #{ skinTypeId,jdbcType=INTEGER }
+            </if>
+            <if test="typeId != null">
+                and type_id = #{ typeId,jdbcType=INTEGER }
+            </if>
+            <if test="typeName != null">
+                and type_name = #{ typeName,jdbcType=VARCHAR }
+            </if>
+            <if test="kind != null">
+                and kind = #{ kind,jdbcType=INTEGER }
+            </if>
+            <if test="updateTime != null">
+                and update_time = #{ updateTime,jdbcType=TIMESTAMP }
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteSkinType" parameterType="com.zhoubo.model.SkinType">
+        delete from tb_skin_type where 1=1
+        <if test="null!=skinTypeId">
+            and skin_type_id = #{ skinTypeId,jdbcType=INTEGER }
+        </if>
+        <if test="null!=kind">
+            and kind = #{kind,jdbcType=INTEGER}
+        </if>
+    </delete>
+
+    <insert id="insert"
+            parameterType="com.zhoubo.model.SkinType" useGeneratedKeys="true" keyProperty="skinTypeId">
+        insert into tb_skin_type
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            skin_type_id,
+            type_id,
+            type_name,
+            kind,
+            update_time,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{
+            skinTypeId,jdbcType=INTEGER },
+            #{ typeId,jdbcType=INTEGER },
+            #{
+            typeName,jdbcType=VARCHAR },
+            #{ kind,jdbcType=INTEGER },
+            #{
+            updateTime,jdbcType=TIMESTAMP },
+        </trim>
+    </insert>
+
+    <update id="update"
+            parameterType="com.zhoubo.model.SkinType">
+        update tb_skin_type t
+        <set>
+            <if test="typeId != null">
+                t.type_id = #{ typeId,jdbcType=INTEGER },
+            </if>
+            <if test="typeName != null">
+                t.type_name = #{ typeName,jdbcType=VARCHAR },
+            </if>
+            <if test="kind != null">
+                t.kind = #{ kind,jdbcType=INTEGER },
+            </if>
+            <if test="updateTime != null">
+                t.update_time = #{ updateTime,jdbcType=TIMESTAMP },
+            </if>
+            <if test="desc != null">
+                t.desc = #{ desc,jdbcType=VARCHAR }
+            </if>
+        </set>
+        <where>
+            and t.skin_type_id = #{ skinTypeId,jdbcType=INTEGER }
+        </where>
+    </update>
+
+
+    <select id="getListByKind" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from tb_skin_type
+        where kind = #{ kind,jdbcType=INTEGER }
+    </select>
+
+    <select id="getAll" resultMap="BaseResultMap"
+            parameterType="com.zhoubo.model.SkinType">
+        select
+        <include refid="Base_Column_List"/>
+        from tb_skin_type
+    </select>
+
+
+    <select id="getListByKinds" resultMap="BaseResultMap"
+            parameterType="com.zhoubo.model.SkinType">
+        select
+        <include refid="Base_Column_List"/>
+        from tb_skin_type
+        <where>
+            <if test="kinds != null">
+                and
+                kind in
+                <foreach item="item" index="index" collection="kinds" open="("
+                         separator="," close=")">
+                    ${item}
+                </foreach>
+            </if>
+        </where>
+
+    </select>
+    <select id="getMaxTypeId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        select max(type_id)
+        from tb_skin_type
+        where kind=#{kind}
+    </select>
+    <select id="getSkinTypeByKindAndTypeId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from tb_skin_type
+        <where>
+            and kind = #{kind,jdbcType=INTEGER}
+            and type_id = #{typeId,jdbcType=INTEGER}
+        </where>
+    </select>
+    <select id="getSkinTypeWithPicByKindAndTypeId" resultMap="SkinTypeColumnWithImgMap">
+        select
+        a.skin_type_id, a.type_id, a.type_name, a.kind, b.android_pic, b.ios_pic, a.desc
+        from tb_skin_type a, tb_skin_type_img b
+        <where>
+            and a.skin_type_id = b.skin_type_id
+            and a.kind = #{kind,jdbcType=INTEGER}
+            and a.type_id = #{typeId,jdbcType=INTEGER}
+        </where>
+        order by a.type_id
+    </select>
+    <select id="getAllDimensionTypeData" resultMap="SkinTypeColumnWithImgMap" parameterType="java.util.List">
+        select
+        a.skin_type_id, a.type_id, a.type_name, a.kind, b.android_pic, b.ios_pic, a.desc
+        from tb_skin_type a, tb_skin_type_img b
+        <where>
+            and a.skin_type_id = b.skin_type_id
+            and a.kind in
+            <foreach collection="list" item="dimensions" separator="," open="(" close=")">
+                #{dimensions.tid}
+            </foreach>
+        </where>
+        order by a.kind, a.type_id
+    </select>
+
+    <select id="getLastInsertId" resultType="java.lang.Integer">
+        select last_insert_id();
+    </select>
+
+    <select id="getSkinTypeWithPicById" resultMap="SkinTypeColumnWithImgMap" parameterType="java.lang.Integer">
+        select
+        a.skin_type_id, a.type_id, a.type_name, a.kind, b.android_pic, b.ios_pic, a.desc
+        from tb_skin_type a, tb_skin_type_img b
+        <where>
+            and a.skin_type_id = b.skin_type_id
+            and a.skin_type_id = #{skinTypeId, jdbcType=VARCHAR}
+        </where>
+    </select>
+</mapper>

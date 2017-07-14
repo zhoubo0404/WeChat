@@ -1,22 +1,29 @@
 package com.zhoubo.controller;
 
 import com.thoughtworks.xstream.XStream;
-import com.zhoubo.model.Image;
-import com.zhoubo.model.ImageMessage;
-import com.zhoubo.model.MsgType;
-import com.zhoubo.model.WeChatMessage;
+import com.zhoubo.model.*;
+import com.zhoubo.service.WeChatService;
+import com.zhoubo.util.HttpClientUtil;
 import com.zhoubo.util.XStreamFactory;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
+import java.io.*;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,15 +34,71 @@ import java.util.List;
  */
 //@Controller
 @RequestMapping(value = "/weChat")
-@RestController
+@Controller
 public class WeChatController {
     private final static Logger log = LoggerFactory.getLogger(WeChatController.class);
 
-    @RequestMapping(value = "/index")
-    public String welcome() {
+    @Autowired
+    private WeChatService weChatService;
+
+    public static InputStream generateThumbnail(InputStream imageInputStream) {
+        HttpClient httpClient = new DefaultHttpClient();
+        InputStream inputStream = null;
+
+        try {
+            // NOTE: You must use the same location in your REST call as you used to obtain your subscription keys.
+            //   For example, if you obtained your subscription keys from westus, replace "westcentralus" in the
+            //   URL below with "westus".
+            URIBuilder uriBuilder = new URIBuilder("https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/generateThumbnail");
+
+            uriBuilder.setParameter("width", "100");
+            uriBuilder.setParameter("height", "150");
+            uriBuilder.setParameter("smartCropping", "true");
+
+            URI uri = uriBuilder.build();
+            HttpPost request = new HttpPost(uri);
+
+            // Request headers.
+            request.setHeader("Content-Type", "application/json");
+
+            // NOTE: Replace the "Ocp-Apim-Subscription-Key" value with a valid subscription key.
+            request.setHeader("Ocp-Apim-Subscription-Key", "c8d980c17d494213958318ed78c1b8d4");
+
+            // Request body. Replace the example URL with the URL for the JPEG image of a person.
+//            StringEntity requestEntity = new StringEntity("{\"url\":" + url + "}");
+
+//            StringEntity requestEntity = new StringEntity("{\"url\":\"http://a.hiphotos.baidu.com/zhidao/pic/item/e4dde71190ef76c647fd64809c16fdfaaf51676a.jpg\"}");
+//            request.setEntity(requestEntity);
+            InputStreamEntity inputStreamEntity = new InputStreamEntity(imageInputStream);
+            request.setEntity(inputStreamEntity);
+            HttpResponse response = httpClient.execute(request);
+            System.out.println(response);
+
+            // Display the thumbnail.
+            HttpEntity httpEntity = response.getEntity();
+            inputStream = httpEntity.getContent();
+//            displayImage(httpEntity.getContent());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return inputStream;
+    }
+
+    @RequestMapping(value = "/welcome")
+    public String welcome(String json) {
+        System.out.println("json  = " + json);
+        return "redirect:https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5431e0019980e6e6&redirect_uri=http%3A%2F%2Fwechatdemo.tunnel.qydev.com%2FweChat%2FtestIndex&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect";
+//        return "redirect:https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5e1ec633ff1209c1&redirect_uri=http%3A%2F%2Fwechatdemo.tunnel.qydev.com%2FweChat%2FtestIndex&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect";
+//        return "redirect:http://wechatdemo.tunnel.qydev.com/weChat/testIndex";
+    }
+
+    @RequestMapping(value = "/testIndex")
+    public String test(String code, String state) {
+        System.out.println("code = " + code + " state = " + state);
         return "index";
     }
 
+    @ResponseBody
     @RequestMapping(value = "/receiveWxMsg")
     public String receiveMsg(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String token = request.getParameter("token");
@@ -55,10 +118,8 @@ public class WeChatController {
         System.out.println("timestamp = " + timestamp);
         System.out.println("nonce = " + nonce);
         System.out.println("echostr = " + echostr);
-       return  "success";
+        return "success";
     }
-
-
 
     private void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setCharacterEncoding("UTF-8");
@@ -119,6 +180,54 @@ public class WeChatController {
         outMsg.setMsgType(MsgType.IMAGE);
         Image image = new Image();
         image.setMediaId(wcm.getMediaId());
+//        image.setPicUrl(wcm.getPicUrl());
+        //使用Microsoft Azure 生产缩略图
+        AccessToken accessToken = weChatService.getAccessToken();
+        String jsonParams = "access_token=" + accessToken.getToken() + "&media_id=" + wcm.getMediaId();
+        System.out.println("获得临时素材 = " + "https://api.weixin.qq.com/cgi-bin/media/get" + "?" + jsonParams);
+        String picUrl = null;
+//        try {
+//            picUrl = HttpClientUtil.sendGetRequest("https://api.weixin.qq.com/cgi-bin/media/get" + "?" + jsonParams);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+        System.out.println("picUrl = " + "https://api.weixin.qq.com/cgi-bin/media/get" + "?" + jsonParams);
+//        https://api.weixin.qq.com/cgi-bin/media/get?access_token=ACCESS_TOKEN&media_id=MEDIA_ID
+//        InputStream inputStream = generateThumbnail("https://api.weixin.qq.com/cgi-bin/media/get" + "?" + jsonParams);
+        byte[] bytes = HttpClientUtil.htppGetTobytes("https://api.weixin.qq.com/cgi-bin/media/get" + "?" + jsonParams);
+        InputStream inputStream = new ByteArrayInputStream(bytes);
+        inputStream = generateThumbnail(inputStream);
+        FileOutputStream fileOutputStream = null;
+
+        try {
+//            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+//            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            fileOutputStream = new FileOutputStream(new File("G:\\git\\image\\3.jpg"));
+            byte[] byteBuffer = new byte[1024];
+            int b;
+            try {
+                b = inputStream.read(byteBuffer);
+                while (b != -1) {
+                    fileOutputStream.write(byteBuffer);
+                    b = inputStream.read(byteBuffer);
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fileOutputStream.close();
+                inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+
         List<Image> images = new ArrayList<Image>();
         images.add(image);
         outMsg.setImage(images);

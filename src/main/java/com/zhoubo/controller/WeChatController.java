@@ -3,6 +3,7 @@ package com.zhoubo.controller;
 import com.thoughtworks.xstream.XStream;
 import com.zhoubo.model.*;
 import com.zhoubo.service.WeChatService;
+import com.zhoubo.util.AliyunOSSUtil;
 import com.zhoubo.util.HttpClientUtil;
 import com.zhoubo.util.XStreamFactory;
 import org.apache.http.HttpEntity;
@@ -10,7 +11,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,7 @@ public class WeChatController {
     @Autowired
     private WeChatService weChatService;
 
-    public static InputStream generateThumbnail(InputStream imageInputStream) {
+    public static InputStream generateThumbnail(String imgUrl) {
         HttpClient httpClient = new DefaultHttpClient();
         InputStream inputStream = null;
 
@@ -68,9 +69,10 @@ public class WeChatController {
 //            StringEntity requestEntity = new StringEntity("{\"url\":" + url + "}");
 
 //            StringEntity requestEntity = new StringEntity("{\"url\":\"http://a.hiphotos.baidu.com/zhidao/pic/item/e4dde71190ef76c647fd64809c16fdfaaf51676a.jpg\"}");
-//            request.setEntity(requestEntity);
-            InputStreamEntity inputStreamEntity = new InputStreamEntity(imageInputStream);
-            request.setEntity(inputStreamEntity);
+            StringEntity requestEntity = new StringEntity("{\"url\":" + imgUrl + "}");
+            request.setEntity(requestEntity);
+//            InputStreamEntity inputStreamEntity = new InputStreamEntity(imageInputStream);
+//            request.setEntity(inputStreamEntity);
             HttpResponse response = httpClient.execute(request);
             System.out.println(response);
 
@@ -196,6 +198,7 @@ public class WeChatController {
 //        InputStream inputStream = generateThumbnail("https://api.weixin.qq.com/cgi-bin/media/get" + "?" + jsonParams);
         byte[] bytes = HttpClientUtil.htppGetTobytes("https://api.weixin.qq.com/cgi-bin/media/get" + "?" + jsonParams);
         InputStream inputStream = new ByteArrayInputStream(bytes);
+        String imgUrl = AliyunOSSUtil.putObject(inputStream);
         inputStream = generateThumbnail(inputStream);
         FileOutputStream fileOutputStream = null;
 

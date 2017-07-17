@@ -3,15 +3,16 @@ package com.zhoubo.controller;
 import com.thoughtworks.xstream.XStream;
 import com.zhoubo.model.*;
 import com.zhoubo.service.WeChatService;
-import com.zhoubo.util.AliyunOSSUtil;
+import com.zhoubo.util.FileUtil;
 import com.zhoubo.util.HttpClientUtil;
+import com.zhoubo.util.WeChatAPI;
 import com.zhoubo.util.XStreamFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class WeChatController {
     @Autowired
     private WeChatService weChatService;
 
-    public static InputStream generateThumbnail(String imgUrl) {
+    public static InputStream generateThumbnail(byte[] bytes) {
         HttpClient httpClient = new DefaultHttpClient();
         InputStream inputStream = null;
 
@@ -60,7 +61,8 @@ public class WeChatController {
             HttpPost request = new HttpPost(uri);
 
             // Request headers.
-            request.setHeader("Content-Type", "application/json");
+//            request.setHeader("Content-Type", "application/json");
+//            request.setHeader("Content-Type", "application/json");
 
             // NOTE: Replace the "Ocp-Apim-Subscription-Key" value with a valid subscription key.
             request.setHeader("Ocp-Apim-Subscription-Key", "c8d980c17d494213958318ed78c1b8d4");
@@ -69,8 +71,16 @@ public class WeChatController {
 //            StringEntity requestEntity = new StringEntity("{\"url\":" + url + "}");
 
 //            StringEntity requestEntity = new StringEntity("{\"url\":\"http://a.hiphotos.baidu.com/zhidao/pic/item/e4dde71190ef76c647fd64809c16fdfaaf51676a.jpg\"}");
-            StringEntity requestEntity = new StringEntity("{\"url\":" + imgUrl + "}");
-            request.setEntity(requestEntity);
+//            System.out.println("imgUrl = " + imgUrl);
+/*            StringEntity requestEntity = new StringEntity("{\"url\":" + imgUrl + "}");
+            request.setEntity(requestEntity);*/
+            MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+            multipartEntityBuilder.addBinaryBody("url", bytes);
+//            multipartEntityBuilder.add
+            HttpEntity httpEntity1 = multipartEntityBuilder.build();
+//            MultipartEntity httpEntity1 = new MultipartEntity();
+//            httpEntity1.addPart("url", new FileBody(new File("G:\\git\\image\\IMG_1141.JPG")));
+            request.setEntity(httpEntity1);
 //            InputStreamEntity inputStreamEntity = new InputStreamEntity(imageInputStream);
 //            request.setEntity(inputStreamEntity);
             HttpResponse response = httpClient.execute(request);
@@ -197,15 +207,26 @@ public class WeChatController {
 //        https://api.weixin.qq.com/cgi-bin/media/get?access_token=ACCESS_TOKEN&media_id=MEDIA_ID
 //        InputStream inputStream = generateThumbnail("https://api.weixin.qq.com/cgi-bin/media/get" + "?" + jsonParams);
         byte[] bytes = HttpClientUtil.htppGetTobytes("https://api.weixin.qq.com/cgi-bin/media/get" + "?" + jsonParams);
-        InputStream inputStream = new ByteArrayInputStream(bytes);
-        String imgUrl = AliyunOSSUtil.putObject(inputStream);
-        inputStream = generateThumbnail(inputStream);
+//        InputStream inputStream = new ByteArrayInputStream(bytes);
+        InputStream inputStream;
+//        String imgUrl = AliyunOSSUtil.putObject(inputStream);
+//        String imgUrl = AliyunOSSUtil.getImage();
+        FileUtil.save(bytes);
+        inputStream = generateThumbnail(bytes);
+/*        String uploadMediaFile =  WeChatAPI.UPLOAD_MEDIA_FILE;
+        uploadMediaFile = uploadMediaFile.replace("ACCESS_TOKEN", accessToken.getToken()).replace("TYPE", "image");
+        log.info("uploadMediaFile", uploadMediaFile);
+        System.out.println("uploadMediaFile = " + uploadMediaFile);
+        String uploadResponse = HttpClientUtil.uploadFile(uploadMediaFile, inputStream);
+        log.info("uploadResponse", uploadResponse);
+        System.out.println("uploadResponse = " +  uploadResponse);*/
         FileOutputStream fileOutputStream = null;
-
+        File file = null;
         try {
 //            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 //            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            fileOutputStream = new FileOutputStream(new File("G:\\git\\image\\3.jpg"));
+            file = new File("G:\\git\\image\\3.jpg");
+            fileOutputStream = new FileOutputStream(file);
             byte[] byteBuffer = new byte[1024];
             int b;
             try {
@@ -229,6 +250,16 @@ public class WeChatController {
             }
 
         }
+
+        String uploadMediaFile = WeChatAPI.UPLOAD_MEDIA_FILE;
+        uploadMediaFile = uploadMediaFile.replace("ACCESS_TOKEN", accessToken.getToken()).replace("TYPE", "image");
+        log.info("uploadMediaFile", uploadMediaFile);
+        System.out.println("uploadMediaFile = " + uploadMediaFile);
+        String uploadResponse = HttpClientUtil.uploadFile(uploadMediaFile, file);
+        log.info("uploadResponse", uploadResponse);
+        System.out.println("uploadResponse = " + uploadResponse);
+//        JSONParser
+//        JSONObject jsonObject = new JSONObject();
 
 
         List<Image> images = new ArrayList<Image>();

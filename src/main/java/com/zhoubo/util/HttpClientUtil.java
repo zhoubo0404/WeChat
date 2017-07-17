@@ -15,7 +15,9 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.protocol.HTTP;
@@ -23,25 +25,9 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.ConnectException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
+import javax.net.ssl.*;
+import java.io.*;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -531,5 +517,61 @@ public class HttpClientUtil {
             }
         }
         return result;
+    }
+
+    public static String uploadFile(String url, InputStream inputStream) {
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+        HttpClient httpClient = httpClientBuilder.build();
+/*        URI uri = null;
+        try {
+            uri = new URI(url);
+        } catch (URISyntaxException e) {
+            log.info("url has some problem !");
+            e.printStackTrace();
+        }*/
+        HttpPost request = new HttpPost(url);
+        MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+        multipartEntityBuilder.addBinaryBody("media", inputStream);
+        HttpEntity httpEntity = multipartEntityBuilder.build();
+        request.setEntity(httpEntity);
+        HttpResponse response;
+        HttpEntity responseHttpEntity;
+        String responseStr = null;
+        try {
+            response = httpClient.execute(request);
+            responseHttpEntity = response.getEntity();
+            responseStr = responseHttpEntity.getContent().toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return responseStr;
+    }
+
+    public static String uploadFile(String url, File file) {
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+        HttpClient httpClient = httpClientBuilder.build();
+/*        URI uri = null;
+        try {
+            uri = new URI(url);
+        } catch (URISyntaxException e) {
+            log.info("url has some problem !");
+            e.printStackTrace();
+        }*/
+        HttpPost request = new HttpPost(url);
+        MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+        multipartEntityBuilder.addBinaryBody("media", file);
+        HttpEntity httpEntity = multipartEntityBuilder.build();
+        request.setEntity(httpEntity);
+        HttpResponse response;
+        HttpEntity responseHttpEntity;
+        String responseStr = null;
+        try {
+            response = httpClient.execute(request);
+            responseHttpEntity = response.getEntity();
+            responseStr = EntityUtils.toString(responseHttpEntity);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return responseStr;
     }
 }

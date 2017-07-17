@@ -1,5 +1,6 @@
 package com.zhoubo.controller;
 
+import com.alibaba.druid.support.json.JSONParser;
 import com.thoughtworks.xstream.XStream;
 import com.zhoubo.model.*;
 import com.zhoubo.service.WeChatService;
@@ -29,6 +30,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -190,8 +192,7 @@ public class WeChatController {
         outMsg.setToUserName(wcm.getFromUserName());
         outMsg.setFromUserName(wcm.getToUserName());
         outMsg.setMsgType(MsgType.IMAGE);
-        Image image = new Image();
-        image.setMediaId(wcm.getMediaId());
+
 //        image.setPicUrl(wcm.getPicUrl());
         //使用Microsoft Azure 生产缩略图
         AccessToken accessToken = weChatService.getAccessToken();
@@ -260,10 +261,15 @@ public class WeChatController {
         System.out.println("uploadResponse = " + uploadResponse);
 //        JSONParser
 //        JSONObject jsonObject = new JSONObject();
-
-
+        JSONParser jsonParser = new JSONParser(uploadResponse);
+        Map<String, Object> map = jsonParser.parseMap();
+        Image image = new Image();
+        image.setMediaId((String) map.get("media_id"));
+        Image image1 = new Image();
+        image1.setMediaId(wcm.getMediaId());
         List<Image> images = new ArrayList<Image>();
         images.add(image);
+        images.add(image1);
         outMsg.setImage(images);
         try {
             XStream xs = XStreamFactory.init(true);

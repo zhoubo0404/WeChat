@@ -574,4 +574,26 @@ public class HttpClientUtil {
         }
         return responseStr;
     }
+
+    public static InputStream htppGetToInputStream(String reqURL) {
+//        byte[] respContent = null;
+        InputStream inputStream = null;
+        HttpClient httpClient = new DefaultHttpClient();
+        httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10000);
+        httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 20000);
+        HttpGet httpGet = new HttpGet(reqURL);
+        try {
+            HttpResponse response = httpClient.execute(httpGet);
+            HttpEntity entity = response.getEntity();
+            if (null != entity) {
+                inputStream = entity.getContent();
+                EntityUtils.consume(entity);
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        } finally {
+            httpClient.getConnectionManager().shutdown();
+        }
+        return inputStream;
+    }
 }

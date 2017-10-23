@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<configuration>
+    <property name="USER_HOME" value="C:/log"/>
+
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{HH:mm:ss.SSS} %-5level [%thread] %logger{40}:%L - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="NormalFile" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <Key>projectName</Key>
+            <DefaultValue>1</DefaultValue>
+        </discriminator>
+        <sift>
+            <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>${USER_HOME}/${projectName}/normal_logs/normal.log</file>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <fileNamePattern>${USER_HOME}/${projectName}/normal_logs/normal-%d{yyyy-MM-dd}.%i.log
+                    </fileNamePattern>
+                    <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                        <maxFileSize>6MB</maxFileSize>
+                    </timeBasedFileNamingAndTriggeringPolicy>
+                    <maxHistory>60</maxHistory>
+                </rollingPolicy>
+                <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                    <pattern>%date{HH:mm:ss.SSS} %-5level [%thread] %logger{40}:%L - %msg%n
+                    </pattern>
+                </encoder>
+            </appender>
+        </sift>
+    </appender>
+
+    <appender name="AccessFile" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <Key>projectName</Key>
+            <DefaultValue>1</DefaultValue>
+        </discriminator>
+        <sift>
+            <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>${USER_HOME}/${projectName}/access_logs/access.log</file>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <fileNamePattern>${USER_HOME}/${projectName}/access_logs/access-%d{yyyy-MM-dd}.%i.log
+                    </fileNamePattern>
+                    <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                        <maxFileSize>6MB</maxFileSize>
+                    </timeBasedFileNamingAndTriggeringPolicy>
+                    <maxHistory>60</maxHistory>
+                </rollingPolicy>
+                <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                    <pattern>%msg%n
+                    </pattern>
+                </encoder>
+            </appender>
+        </sift>
+    </appender>
+
+    <appender name="ErrorFile" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <Key>projectName</Key>
+            <DefaultValue>1</DefaultValue>
+        </discriminator>
+        <sift>
+            <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>${USER_HOME}/${projectName}/error_logs/error.log</file>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <fileNamePattern>${USER_HOME}/${projectName}/error_logs/error-%d{yyyy-MM-dd}.%i.log
+                    </fileNamePattern>
+                    <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                        <maxFileSize>6MB</maxFileSize>
+                    </timeBasedFileNamingAndTriggeringPolicy>
+                    <maxHistory>60</maxHistory>
+                </rollingPolicy>
+                <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                    <pattern>%date{HH:mm:ss.SSS} %-5level [%thread] %logger{40}:%L - %msg%n
+                    </pattern>
+                </encoder>
+                <filter class="ch.qos.logback.classic.filter.LevelFilter">
+                    <level>ERROR</level>
+                    <onMatch>ACCEPT</onMatch>
+                    <onMismatch>DENY</onMismatch>
+                </filter>
+            </appender>
+        </sift>
+    </appender>
+
+    <appender name="StatisticsFile" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <Key>projectName</Key>
+            <DefaultValue>1</DefaultValue>
+        </discriminator>
+        <sift>
+            <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>${USER_HOME}/${projectName}/statistics_logs/statistics.log</file>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <fileNamePattern>${USER_HOME}/${projectName}/statistics_logs/statistics-%d{yyyy-MM-dd}.%i.log
+                    </fileNamePattern>
+                    <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                        <maxFileSize>6MB</maxFileSize>
+                    </timeBasedFileNamingAndTriggeringPolicy>
+                    <maxHistory>60</maxHistory>
+                </rollingPolicy>
+                <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                    <pattern>%date|%msg%n
+                    </pattern>
+                </encoder>
+                <filter class="ch.qos.logback.classic.filter.LevelFilter">
+                    <level>INFO</level>
+                    <onMatch>ACCEPT</onMatch>
+                    <onMismatch>DENY</onMismatch>
+                </filter>
+            </appender>
+        </sift>
+    </appender>
+
+    <appender name="DeviceSessionFile" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <Key>projectName</Key>
+            <DefaultValue>1</DefaultValue>
+        </discriminator>
+        <sift>
+            <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>${USER_HOME}/${projectName}/devicesession_logs/deviceSession.log</file>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <fileNamePattern>${USER_HOME}/${projectName}/devicesession_logs/deviceSession-%d{yyyy-MM-dd}.%i.log
+                    </fileNamePattern>
+                    <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                        <maxFileSize>6MB</maxFileSize>
+                    </timeBasedFileNamingAndTriggeringPolicy>
+                    <maxHistory>60</maxHistory>
+                </rollingPolicy>
+                <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                    <pattern>%date|%msg%n
+                    </pattern>
+                </encoder>
+                <filter class="ch.qos.logback.classic.filter.LevelFilter">
+                    <level>DEBUG</level>
+                    <onMatch>ACCEPT</onMatch>
+                    <onMismatch>DENY</onMismatch>
+                </filter>
+            </appender>
+        </sift>
+    </appender>
+
+    <!--    <appender name="DruidFile" class="ch.qos.logback.core.FileAppender">
+            <file>${USER_HOME}/${projectName}/logs/druid_info.log</file>
+            <layout class="ch.qos.logback.classic.PatternLayout">
+                <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
+            </layout>
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>debug</level>
+            </filter>
+        </appender>-->
+
+    <logger name="AccessLog" additivity="false">
+        <appender-ref ref="NormalFile"/>
+        <appender-ref ref="AccessFile"/>
+        <appender-ref ref="stdout"/>
+    </logger>
+
+    <logger name="com.zhoubo" level="DEBUG"/>
+    <!--    <logger name="com.alibaba.druid" level="DEBUG"/>-->
+
+    <logger name="com.clife.business.expert.calculate" level="INFO">
+    </logger>
+
+    <logger name="StatisticsLog" level="INFO" additivity="false">
+        <appender-ref ref="StatisticsFile"/>
+    </logger>
+
+    <logger name="DeviceSessionLog" level="DEBUG" additivity="false">
+        <appender-ref ref="DeviceSessionFile"/>
+    </logger>
+
+    <root level="DEBUG">
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="NormalFile"/>
+        <appender-ref ref="ErrorFile"/>
+    </root>
+</configuration>

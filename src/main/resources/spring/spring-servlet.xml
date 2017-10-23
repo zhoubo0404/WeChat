@@ -9,10 +9,10 @@
     <description>Spring-web MVC配置</description>
     <mvc:resources location="/" mapping="/**/*.html"/>
     <mvc:resources location="/" mapping="/**/*.txt"/>
-
+    <mvc:resources location="/" mapping="/**/*.js"/>
     <!-- 定义JSP -->
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix" value="/WEB-INF/views/"/>
-        <property name="suffix" value=".jsp"/>
+        <property name="suffix" value=".html"/>
     </bean>
 </beans>

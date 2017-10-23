@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd ">
+
+    <context:annotation-config/>
+
+    <!--<import resource="classpath*:spring/spring-communication-interface.xml"/>-->
+
+    <!--<bean id="cacheService"  class="com.clife.commons.utils.cache.CacheServiceImpl"  />-->
+
+    <!-- 需要jms通讯的应用加上 -->
+    <!--<bean name="applicationManager" id="applicationManager" class="com.clife.commons.application.ApplicationManager" init-method="init">-->
+    <!--<constructor-arg name="zooKeeperManager" ref="zookeeperManager"/>-->
+    <!--&lt;!&ndash; 设备大小分类 &ndash;&gt;-->
+    <!--<constructor-arg name="applicationName" value="73_*_*"/>-->
+    <!--</bean>-->
+
+    <!--    <bean id="jmsConnectionFactoryPool" class="org.apache.activemq.pool.PooledConnectionFactory" destroy-method="stop">
+            <property name="connectionFactory">
+                <bean class="org.apache.activemq.ActiveMQConnectionFactory">
+                    <property name="brokerURL" value="${jms.failover}"/>
+                    <property name="alwaysSessionAsync" value="true"/>
+                    <property name="alwaysSyncSend" value="true"/>
+                    <property name="useAsyncSend" value="true"/>
+                </bean>
+            </property>
+            <property name="maxConnections" value="10"></property>
+        </bean>-->
+
+    <!--延时，定时动作分发队列-->
+    <!--控制数据topic-->
+    <bean id="runDataDestination" class="org.apache.activemq.command.ActiveMQTopic">
+        <constructor-arg index="0" value="clife.deviceTypeId_31.runData.topic"/>
+    </bean>
+
+    <!--    <bean id="jmsTemplateRunDataTopic" class="org.springframework.jms.core.JmsTemplate">
+            <property name="connectionFactory" ref="jmsConnectionFactoryPool"/>
+            <property name="defaultDestination" ref="runDataDestination"></property>
+            &lt;!&ndash; true为订阅发布者模式 &ndash;&gt;
+            <property name="pubSubDomain" value="true"></property>
+            &lt;!&ndash; 1为不持久化 2为持久化 &ndash;&gt;
+            <property name="deliveryMode" value="1"></property>
+            <property name="timeToLive" value="1800000"></property>
+            <property name="explicitQosEnabled" value="true"></property>
+        </bean>-->
+
+    <!--控制数据topic-->
+    <!--    <bean id="configDataDestination" class="org.apache.activemq.command.ActiveMQTopic">
+            <constructor-arg index="0" value="clife.deviceTypeId_31.configData.topic"/>
+        </bean>-->
+
+    <!--    <bean id="jmsTemplateConfigDataTopic" class="org.springframework.jms.core.JmsTemplate">
+            <property name="connectionFactory" ref="jmsConnectionFactoryPool"/>
+            <property name="defaultDestination" ref="configDataDestination"></property>
+            &lt;!&ndash; true为订阅发布者模式 &ndash;&gt;
+            <property name="pubSubDomain" value="true"></property>
+            &lt;!&ndash; 1为不持久化 2为持久化 &ndash;&gt;
+            <property name="deliveryMode" value="1"></property>
+            <property name="timeToLive" value="1800000"></property>
+            <property name="explicitQosEnabled" value="true"></property>
+        </bean>-->
+
+    <!--运行数据Listener-->
+    <!--    <bean id="consumerRunDataSessionAwareMessageListener" class="com.zhoubo.listener.ConsumerRunDataSessionAwareMessageListener">
+        </bean>-->
+
+    <!--    <bean id="deviceRunDataListenerContainer"
+              class="org.springframework.jms.listener.DefaultMessageListenerContainer" destroy-method="destroy">
+            <property name="connectionFactory" ref="jmsConnectionFactoryPool"/>
+            <property name="destination" ref="runDataDestination"/>
+            <property name="messageListener" ref="consumerRunDataSessionAwareMessageListener"/>
+            &lt;!&ndash;<property name="concurrentConsumers" value="1"/>&ndash;&gt;
+            <property name="concurrency" value="1-8"/>
+            <property name="cacheLevel" value="3"></property>
+        </bean>-->
+
+
+    <!--控制数据Listener-->
+    <!--    <bean id="consumerConfigDataSessionAwareMessageListener" class="com.zhoubo.listener.ConsumerConfigDataSessionAwareMessageListener">
+        </bean>-->
+    <!--
+        <bean id="deviceConfigDataListenerContainer"
+              class="org.springframework.jms.listener.DefaultMessageListenerContainer" destroy-method="destroy">
+            <property name="connectionFactory" ref="jmsConnectionFactoryPool"/>
+            <property name="destination" ref="configDataDestination"/>
+            <property name="messageListener" ref="consumerConfigDataSessionAwareMessageListener"/>
+            &lt;!&ndash;<property name="concurrentConsumers" value="1"/>&ndash;&gt;
+            <property name="concurrency" value="1-8"/>
+            <property name="cacheLevel" value="3"></property>
+        </bean>-->
+
+</beans>

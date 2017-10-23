@@ -1,0 +1,58 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="http://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script>
+    <script src="stomp.js"></script>
+    <script type="text/javascript">
+
+        /*      var url = 'ws://' + window.location.host + '/marco';*/
+        //        var url = 'http://' + window.location.host + '/marco';
+        var url = 'http://' + window.location.host + '/marcopolo';
+        /*        var sock = new WebSocket(url);*/
+        var sock = new SockJS(url);
+        var stomp = Stomp.over(sock);
+
+        var payload = JSON.stringify({'message': 'Marco!'});
+
+        stomp.connect('guest', 'guest', function (frame) {
+            stomp.send("/app/topicmarco", {}, payload);
+            stomp.subscribe("/topic/spittlefeed", handleSpittle);
+            stomp.subscribe("/topic/spittlefeed1", handleSpittle);
+        });
+
+        function handleSpittle(incoming) {
+            var spittle = JSON.parse(incoming.body);
+            console.log('Received: ', spittle);
+//            var source = $()
+        }
+
+
+        /*    sock.onopen = function () {
+                console.log('Opening');
+                sayMarco();
+            };
+            sock.onmessage = function (e) {
+                console.log('Received message: ', e.data);
+                setTimeout(function () {
+                    sayMarco()
+                }, 2000);
+            };
+            sock.onclose = function () {
+                console.log('Closing');
+            };
+    */
+        function sayMarco() {
+            console.log('Sending Marco!');
+            sock.send("Marco!");
+        }
+
+        //        document.onready = testSockJS();
+    </script>
+</head>
+<body>
+
+<h2>Hello World!</h2>
+<button onclick='getElementById("demo").innerHTML=Date()'>现在的时间是??</button>
+<button onclick='testSockJS()'>启动SockJS链接</button>
+</body>
+</html>

@@ -13,6 +13,7 @@
     <mvc:annotation-driven />
 
     <import resource="classpath:spring/spring-environment.xml"/>
+    <import resource="classpath:spring/spring-communication.xml"/>
 
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
@@ -35,9 +36,10 @@
                 </property>-->
     </bean>
 
-    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
         <property name="driverClassName" value="${jdbc.driver}"/>
         <property name="url" value="${jdbc.skinmeter.url}"/>
+        <!--        <property name="url" value="${jdbc.dbproxy.url}"/>-->
         <property name="username" value="${jdbc.username}"/>
         <property name="password" value="${jdbc.password}"/>
         <property name="maxActive" value="${dbcp.maxActive}"/>
@@ -45,7 +47,27 @@
         <property name="defaultAutoCommit" value="${dbcp.defaultAutoCommit}"/>
         <property name="timeBetweenEvictionRunsMillis" value="${dbcp.timeBetweenEvictionRunsMillis}"/>
         <property name="minEvictableIdleTimeMillis" value="${dbcp.minEvictableIdleTimeMillis}"/>
+        <property name="proxyFilters">
+            <list>
+                <ref bean="stat-filter"/>
+                <ref bean="log-filter"/>
+            </list>
+        </property>
+
     </bean>
+
+    <bean id="stat-filter" class="com.alibaba.druid.filter.stat.StatFilter">
+        <!-- 慢SQL记录 -->
+        <property name="slowSqlMillis" value="10000"/>
+        <property name="logSlowSql" value="true"/>
+        <!-- SQL合并配置 -->
+        <property name="mergeSql" value="true"/>
+    </bean>
+
+    <bean id="log-filter" class="com.alibaba.druid.filter.logging.Slf4jLogFilter">
+        <property name="statementExecutableSqlLogEnable" value="false"/>
+    </bean>
+
     <!-- 数据源配置, 使用 BoneCP 数据库连接池 -->
 
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
